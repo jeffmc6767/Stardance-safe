@@ -1,0 +1,108 @@
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <SPI.h>
+#include <MFRC522.h>
+#include <ESP32Servo.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+#define OLED_RESET -1
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+
+#define SS_PIN 5
+#define RST_PIN 27
+MFRC522 rfid(SS_PIN, RST_PIN);
+
+#define SCK 18
+#define MISO 19
+#define MOSI 23
+
+Servo lockServo;
+#define SERVO_PIN 13
+
+bool unlocked = false;
+
+byte allowedUID[] = {0x04, 0xE7, 0x67, 0x07, 0xCC, 0x2A, 0x81};
+
+bool isAllowed() {
+  if (rfid.uid.size != 7) return false;
+
+  for (byte i = 0; i < 7; i++) {
+    if (rfid.uid.uidByte[i] != allowedUID[i]) return false;
+  }
+  return true;
+}
+
+void drawOLED(const char* msg) {
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_WHITE);
+
+  display.setCursor(10, 0);
+  display.println("SAFE");
+
+  display.setTextSize(1);
+  display.setCursor(0, 30);
+  display.println(msg);
+
+  display.setCursor(0, 50);
+  display.print("Status: ");
+  display.println(unlocked ? "UNLOCKED" : "LOCKED");
+
+  display.display();
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  delay(300);
+
+  Wire.begin(21, 22);
+
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println("OLED FAIL");
+    while (true);
+  }
+
+  drawOLED("BOOT");
+
+  SPI.begin(SCK, MISO, MOSI, SS_PIN);
+  rfid.PCD_Init();
+
+  lockServo.attach(SERVO_PIN);
+  lockServo.write(0);
+
+  delay(300);
+  drawOLED("Scan Card");
+}
+
+void loop() {
+
+  static unsigned long lastDraw = 0;
+  if (millis() - lastDraw > 1000) {
+    drawOLED("Scan Card");
+    lastDraw = millis();
+  }
+
+  if (!rfid.PICC_IsNewCardPresent()) return;
+  if (!rfid.PICC_ReadCardSerial()) return;
+
+  Serial.print("UID: ");
+  for (byte i = 0; i < rfid.uid.size; i++) {
+    Serial.print(rfid.uid.uidByte[i], HEX);
+    Serial.print(" ");
+  }
+  Serial.println();
+
+  if (isAllowed()) {
+    unlocked = !unlocked;
+    lockServo.write(unlocked ? 90 : 0);
+    drawOLED(unlocked ? "GRANTED" : "LOCKED");
+  } else {
+    drawOLED("DENIED");
+  }
+
+  delay(500);
+  rfid.PICC_HaltA();
+}
