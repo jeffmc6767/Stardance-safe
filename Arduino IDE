@@ -8,22 +8,27 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 #define OLED_RESET -1
+
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 #define SS_PIN 5
 #define RST_PIN 27
+
 MFRC522 rfid(SS_PIN, RST_PIN);
 
-#define SCK 18
-#define MISO 19
-#define MOSI 23
-
-Servo lockServo;
 #define SERVO_PIN 13
+Servo lockServo;
+
+#define BUZZER_PIN 26
+
+const int LOCKED_POS = 90;
+const int UNLOCKED_POS = 0;
 
 bool unlocked = false;
 
 byte allowedUID[] = {0x04, 0xE7, 0x67, 0x07, 0xCC, 0x2A, 0x81};
+
+unsigned long lastScan = 0;
 
 bool isAllowed() {
   if (rfid.uid.size != 7) return false;
@@ -31,24 +36,44 @@ bool isAllowed() {
   for (byte i = 0; i < 7; i++) {
     if (rfid.uid.uidByte[i] != allowedUID[i]) return false;
   }
+
   return true;
 }
 
-void drawOLED(const char* msg) {
+void updateServo() {
+  if (unlocked)
+    lockServo.write(UNLOCKED_POS);
+  else
+    lockServo.write(LOCKED_POS);
+}
+
+void beep(int duration) {
+  digitalWrite(BUZZER_PIN, HIGH);
+  delay(duration);
+  digitalWrite(BUZZER_PIN, LOW);
+}
+
+void showScreen(String message) {
   display.clearDisplay();
+
   display.setTextSize(2);
   display.setTextColor(SSD1306_WHITE);
 
-  display.setCursor(10, 0);
+  display.setCursor(18, 0);
   display.println("SAFE");
 
   display.setTextSize(1);
-  display.setCursor(0, 30);
-  display.println(msg);
+
+  display.setCursor(0, 28);
+  display.println(message);
 
   display.setCursor(0, 50);
   display.print("Status: ");
-  display.println(unlocked ? "UNLOCKED" : "LOCKED");
+
+  if (unlocked)
+    display.print("UNLOCKED");
+  else
+    display.print("LOCKED");
 
   display.display();
 }
@@ -56,53 +81,78 @@ void drawOLED(const char* msg) {
 void setup() {
   Serial.begin(115200);
 
-  delay(300);
-
   Wire.begin(21, 22);
 
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
-    Serial.println("OLED FAIL");
     while (true);
   }
 
-  drawOLED("BOOT");
-
-  SPI.begin(SCK, MISO, MOSI, SS_PIN);
+  SPI.begin(18, 19, 23, 5);
   rfid.PCD_Init();
 
+  lockServo.setPeriodHertz(50);
   lockServo.attach(SERVO_PIN);
-  lockServo.write(0);
+  updateServo();
 
-  delay(300);
-  drawOLED("Scan Card");
+  pinMode(BUZZER_PIN, OUTPUT);
+  digitalWrite(BUZZER_PIN, LOW);
+
+  showScreen("Scan Card");
+
+  Serial.println("System Ready");
 }
 
 void loop() {
-
-  static unsigned long lastDraw = 0;
-  if (millis() - lastDraw > 1000) {
-    drawOLED("Scan Card");
-    lastDraw = millis();
-  }
-
   if (!rfid.PICC_IsNewCardPresent()) return;
+
   if (!rfid.PICC_ReadCardSerial()) return;
 
+  if (millis() - lastScan < 2000) {
+    rfid.PICC_HaltA();
+    rfid.PCD_StopCrypto1();
+    return;
+  }
+
+  lastScan = millis();
+
   Serial.print("UID: ");
+
   for (byte i = 0; i < rfid.uid.size; i++) {
     Serial.print(rfid.uid.uidByte[i], HEX);
     Serial.print(" ");
   }
+
   Serial.println();
 
   if (isAllowed()) {
     unlocked = !unlocked;
-    lockServo.write(unlocked ? 90 : 0);
-    drawOLED(unlocked ? "GRANTED" : "LOCKED");
+
+    updateServo();
+
+    beep(150);
+
+    if (unlocked)
+      showScreen("ACCESS GRANTED");
+    else
+      showScreen("LOCKED");
+
+    Serial.println("Access Granted");
+
   } else {
-    drawOLED("DENIED");
+
+    showScreen("ACCESS DENIED");
+
+    beep(100);
+    delay(100);
+    beep(100);
+
+    Serial.println("Access Denied");
   }
 
-  delay(500);
+  delay(1000);
+
+  showScreen("Scan Card");
+
   rfid.PICC_HaltA();
+  rfid.PCD_StopCrypto1();
 }
