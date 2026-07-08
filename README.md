@@ -72,7 +72,7 @@ Open Library Manager and install:
 
 4. Open the Code
 
-Open the .ino file included in this repository.
+Open the "PROJECT CODE" file included in this repository. and paste it into ARDUINO IDE
 
 ⸻
 
@@ -113,7 +113,7 @@ Edit the code and replace the UID with your own RFID card if needed.
 
 Current UID:
 
-04 E7 67 07 CC 2A 81
+04 E7 67 07 CC 2A 81 - replace this with your NFC card UID
 
 ⸻
 
