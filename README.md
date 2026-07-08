@@ -1,109 +1,67 @@
 This readme was made using AI: - BUT DOUBLE CHECKED BY REAL HUMAN AND ALL INFORMATION IS VALID
+🔐 ESP32 Smart Desk Safe
 
-ESP32 Smart Desk Safe
-
-A simple smart safe built using an ESP32, an RFID reader, an OLED display, a servo motor, and a buzzer. Scan an authorized RFID card to lock or unlock the safe. The OLED displays the current status, and the buzzer provides audio feedback.
-
-⸻
-
-Features
-
-* RFID card authentication
-* OLED status display
-* Servo locking mechanism
-* Buzzer feedback
-* External servo power support
+A simple smart safe built with an ESP32. Scan an authorized RFID card to lock or unlock the servo, view the status on the OLED display, and hear buzzer feedback.
 
 ⸻
 
-Components
+Parts
 
-* ESP32 DevKit V1 (ELEGOO)
+* ESP32 DevKit V1
 * RC522 RFID Reader
-* 0.96” OLED Display (SSD1306 I2C)
+* 0.96” I2C OLED Display
 * SG90 Servo
 * Active Buzzer
-* External 5V Power Supply (recommended)
-* Breadboard
-* Jumper Wires
+* External 5V Power Supply
+* Breadboard & Jumper Wires
 
 ⸻
 
 Wiring
 
-OLED
+Device	Pin	ESP32
+OLED	VCC	3.3V
+	GND	GND
+	SDA	GPIO 21
+	SCL	GPIO 22
+RFID	SDA	GPIO 5
+	SCK	GPIO 18
+	MOSI	GPIO 23
+	MISO	GPIO 19
+	RST	GPIO 27
+	GND	GND
+	3.3V	3.3V
+Servo	Signal	GPIO 13
+	Power	External 5V
+	Ground	External GND
+Buzzer	+	GPIO 26
+	-	GND
 
-OLED	ESP32
-VCC	3.3V
-GND	GND
-SDA	GPIO 21
-SCL	GPIO 22
-
-⸻
-
-RFID (RC522)
-
-RC522	ESP32
-SDA	GPIO 5
-SCK	GPIO 18
-MOSI	GPIO 23
-MISO	GPIO 19
-IRQ	Not Connected
-GND	GND
-RST	GPIO 27
-3.3V	3.3V
-
-Do NOT connect the RC522 to 5V.
+Important: Connect the external power supply GND to an ESP32 GND.
 
 ⸻
 
-Servo
+Setup
 
-Servo	Connection
-Signal (Orange/Yellow)	GPIO 13
-Power (Red)	External 5V
-Ground (Brown/Black)	External GND
+1. Install Arduino IDE
 
-⸻
-
-Buzzer
-
-Buzzer	ESP32
-+	GPIO 26
--	GND
+Download and install the Arduino IDE.
 
 ⸻
 
-Power
+2. Install the ESP32 Board
 
-Power the ESP32 using the USB-C cable.
+In Arduino IDE:
 
-Power the servo using an external 5V power supply.
-
-Connect the external power supply GND to an ESP32 GND pin.
-
-Do not power the servo from the ESP32.
+* Open Boards Manager
+* Search for ESP32
+* Install Espressif ESP32
 
 ⸻
 
-GPIO Summary
+3. Install Libraries
 
-GPIO	Device
-5	RFID SDA
-13	Servo Signal
-18	RFID SCK
-19	RFID MISO
-21	OLED SDA
-22	OLED SCL
-23	RFID MOSI
-26	Buzzer
-27	RFID RST
-
-⸻
-
-Arduino Libraries
-
-Install these libraries using the Arduino Library Manager:
+Open Library Manager and install:
 
 * Adafruit GFX Library
 * Adafruit SSD1306
@@ -112,21 +70,46 @@ Install these libraries using the Arduino Library Manager:
 
 ⸻
 
-Arduino Settings
+4. Open the Code
 
-Board:
-
-ESP32 Dev Module
-
-Upload Speed:
-
-115200
+Open the .ino file included in this repository.
 
 ⸻
 
-RFID Card
+5. Select Your Board
 
-Replace the UID in the code with your own RFID card if needed.
+Choose:
+
+ESP32 Dev Module
+
+⸻
+
+6. Select Your Port
+
+Choose the serial port for your ESP32.
+
+⸻
+
+7. Upload
+
+Click Upload.
+
+If the upload fails, disconnect the servo power and try again.
+
+⸻
+
+8. Power the Servo
+
+After the upload finishes:
+
+* Connect the external 5V power supply.
+* Make sure the external GND is connected to ESP32 GND.
+
+⸻
+
+9. Scan Your RFID Card
+
+Edit the code and replace the UID with your own RFID card if needed.
 
 Current UID:
 
@@ -134,72 +117,22 @@ Current UID:
 
 ⸻
 
-Uploading
+How It Works
 
-1. Connect the ESP32 with USB.
-2. Open the Arduino sketch.
-3. Select ESP32 Dev Module.
-4. Select the correct COM/Serial Port.
-5. Click Upload.
-
-If uploading fails, disconnect the servo and external power, upload again, then reconnect everything.
-
-⸻
-
-Using the Safe
-
-1. Power the ESP32.
-2. Power the servo with the external 5V supply.
-3. The OLED will display Scan Card.
-4. Scan the authorized RFID card.
-5. The servo will lock or unlock.
-6. The OLED will display the current status.
-7. The buzzer will beep once for access granted and twice for access denied.
+1. Power on the ESP32.
+2. The OLED will display Scan Card.
+3. Scan the authorized RFID card.
+4. The servo will lock or unlock.
+5. The OLED displays the status.
+6. The buzzer provides feedback.
 
 ⸻
 
-Troubleshooting
+Current Features
 
-OLED stays black
+* RFID Authentication
+* OLED Status Display
+* Servo Lock
+* Active Buzzer Feedback
 
-* Check SDA is connected to GPIO 21.
-* Check SCL is connected to GPIO 22.
-* Make sure the OLED I2C address is 0x3C.
-
-RFID does not read cards
-
-* Make sure it is powered from 3.3V.
-* Check all SPI wiring.
-* Verify the card UID in the code matches your RFID card.
-
-Servo jitters or resets the ESP32
-
-* Power the servo from an external 5V supply.
-* Connect the external power supply GND to ESP32 GND.
-* Do not power the servo from the ESP32.
-
-Upload fails
-
-* Disconnect the servo while uploading.
-* Use a good USB data cable.
-* Try an upload speed of 115200.
-
-⸻
-
-Current Status
-
-✅ RFID authentication
-
-✅ OLED display
-
-✅ Servo lock
-
-✅ Buzzer feedback
-
-🚧 Keypad support coming soon
-
-🚧 Ultrasonic sensor
-
-🚧 Custom 3D printed enclosure
-
-🚧 Custom PCB
+More features such as a keypad, ultrasonic sensor, and custom enclosure will be added in future updates.
