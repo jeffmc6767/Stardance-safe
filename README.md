@@ -1,4 +1,5 @@
-This readme was made using AI: - BUT DOUBLE CHECKED BY REAL HUMAN AND ALL INFORMATION IS VALID
+THIS WAS README FILE WAS ORGANISED BY AI - I basically put all the information and let it create this - 
+
 🔐 ESP32 Smart Desk Safe
 
 A simple smart safe built with an ESP32. Scan an authorized RFID card to lock or unlock the servo, view the status on the OLED display, and hear buzzer feedback.
