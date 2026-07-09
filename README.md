@@ -1,5 +1,4 @@
-THIS WAS README FILE WAS ORGANISED BY AI - I basically put all the information and let it create this - 
-
+This project is for the Stardance challenge by hackclub if you have any questions please let me know so I can help
 🔐 ESP32 Smart Desk Safe
 
 A simple smart safe built with an ESP32. Scan an authorized RFID card to lock or unlock the servo, view the status on the OLED display, and hear buzzer feedback.
