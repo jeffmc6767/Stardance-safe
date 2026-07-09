@@ -20,23 +20,24 @@ Parts
 
 Wiring
 
-Device	Pin	ESP32
-OLED	VCC	3.3V
-	GND	GND
-	SDA	GPIO 21
-	SCL	GPIO 22
-RFID	SDA	GPIO 5
-	SCK	GPIO 18
-	MOSI	GPIO 23
-	MISO	GPIO 19
-	RST	GPIO 27
-	GND	GND
-	3.3V	3.3V
-Servo	Signal	GPIO 13
-	Power	External 5V
-	Ground	External GND
-Buzzer	+	GPIO 26
-	-	GND
+| **Device**       | **Device Pin**              | **Connect to ESP32**                                    |
+| ---------------- | --------------------------- | ------------------------------------------------------- |
+| **OLED Display** | VCC                         | **3.3V**                                                |
+|                  | GND                         | **GND**                                                 |
+|                  | SDA                         | **GPIO 21**                                             |
+|                  | SCL                         | **GPIO 22**                                             |
+| **RC522 RFID**   | SDA (SS)                    | **GPIO 5**                                              |
+|                  | SCK                         | **GPIO 18**                                             |
+|                  | MOSI                        | **GPIO 23**                                             |
+|                  | MISO                        | **GPIO 19**                                             |
+|                  | RST                         | **GPIO 27**                                             |
+|                  | GND                         | **GND**                                                 |
+|                  | 3.3V                        | **3.3V**                                                |
+| **Servo**        | Signal (Orange/Yellow wire) | **GPIO 13**                                             |
+|                  | Power (Red wire)            | **External 5V**                                         |
+|                  | Ground (Brown/Black wire)   | **External GND** _(must also connect to the ESP32 GND)_ |
+| **Buzzer**       | +                           | **GPIO 26**                                             |
+|                  | -                           | **GND**                                                 |
 
 Important: Connect the external power supply GND to an ESP32 GND.
 
